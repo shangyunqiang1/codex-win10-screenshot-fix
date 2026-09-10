@@ -21,7 +21,7 @@
 - 为每张 PNG 生成 JSON 元数据，记录物理尺寸、DPI 缩放、耗时和 SHA-256。
 - 默认不保存窗口标题或程序路径，减少隐私泄露。
 - 使用 Pester 6.1 测试窗口身份、PNG 解析、前置错误码、诊断隐私、脚本语法和包完整性。
-- GitHub Actions 同时覆盖 PowerShell 7 和 Windows PowerShell 5.1，并保留 NUnit 与 JaCoCo 测试产物。
+- GitHub Actions 使用两个显式作业覆盖 PowerShell 7 和 Windows PowerShell 5.1，并保留 NUnit 与 JaCoCo 测试产物。
 
 ## 安装
 

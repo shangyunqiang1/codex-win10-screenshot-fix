@@ -8,33 +8,44 @@ permissions:
   contents: read
 
 jobs:
-  pester:
-    name: ${{ matrix.name }}
+  powershell-7:
+    name: PowerShell 7
     runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - id: pwsh
-            name: PowerShell 7
-            shell: pwsh
-          - id: windows-powershell
-            name: Windows PowerShell 5.1
-            shell: powershell
     steps:
       - uses: actions/checkout@v6
       - name: Install Pester 6.1.0
-        shell: ${{ matrix.shell }}
+        shell: pwsh
         run: |
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           Install-Module Pester -RequiredVersion 6.1.0 -Scope CurrentUser -Force -SkipPublisherCheck
       - name: Run Pester
-        shell: ${{ matrix.shell }}
-        run: ./tests/run.ps1 -OutputDirectory './test-results/${{ matrix.id }}'
+        shell: pwsh
+        run: ./tests/run.ps1 -OutputDirectory './test-results/pwsh'
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: pester-${{ matrix.id }}
-          path: test-results/${{ matrix.id }}/
+          name: pester-pwsh
+          path: test-results/pwsh/
+          if-no-files-found: warn
+
+  windows-powershell-5-1:
+    name: Windows PowerShell 5.1
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Pester 6.1.0
+        shell: powershell
+        run: |
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          Install-Module Pester -RequiredVersion 6.1.0 -Scope CurrentUser -Force -SkipPublisherCheck
+      - name: Run Pester
+        shell: powershell
+        run: ./tests/run.ps1 -OutputDirectory './test-results/windows-powershell'
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: pester-windows-powershell
+          path: test-results/windows-powershell/
           if-no-files-found: warn

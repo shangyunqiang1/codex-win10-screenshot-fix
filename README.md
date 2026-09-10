@@ -28,7 +28,7 @@ The upstream issue is tracked at [openai/codex#25178](https://github.com/openai/
 - Writes a JSON sidecar containing physical dimensions, DPI scale, duration, and SHA-256.
 - Keeps window titles and executable paths out of diagnostics by default.
 - Adds Pester 6.1 tests for window identity, PNG parsing, preflight error codes, diagnostics privacy, syntax, and package integrity.
-- Runs GitHub Actions on both PowerShell 7 and Windows PowerShell 5.1 and preserves NUnit and JaCoCo artifacts.
+- Runs explicit GitHub Actions jobs on both PowerShell 7 and Windows PowerShell 5.1 and preserves NUnit and JaCoCo artifacts.
 
 ## Install
 

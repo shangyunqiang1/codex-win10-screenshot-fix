@@ -1,10 +1,14 @@
 # Changelog
 
+## 0.3.1 - 2026-09-10
+
+- Use two explicit GitHub Actions jobs after GitHub rejected the equivalent matrix workflow before job creation.
+
 ## 0.3.0 - 2026-09-10
 
 - Replace the lightweight validation script with a real Pester 6.1 test suite.
 - Test window identity, PNG parsing, error codes, diagnostics privacy, script syntax, and package integrity.
-- Run CI on both PowerShell 7 and Windows PowerShell 5.1 and upload NUnit/JaCoCo artifacts.
+- Run CI jobs on both PowerShell 7 and Windows PowerShell 5.1 and upload NUnit/JaCoCo artifacts.
 - Expand and synchronize the English and Simplified Chinese documentation.
 
 ## 0.2.1 - 2026-09-10
