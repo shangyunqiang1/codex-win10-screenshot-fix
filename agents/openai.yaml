@@ -1,0 +1,4 @@
+interface:
+  display_name: "Win10 Snipaste Fallback"
+  short_description: "Use local Snipaste capture when Win10 Computer Use fails"
+  default_prompt: "Use $win10-snipaste-fallback to handle this Windows 10 Computer Use screenshot failure with Snipaste."
