@@ -50,7 +50,35 @@ Describe 'Win10Snipaste common helpers' {
         }
     }
 
+    Context 'Remove-FallbackArtifact' {
+        It 'removes a rejected capture artifact' {
+            $path = Join-Path $TestDrive 'rejected.png'
+            Set-Content -LiteralPath $path -Value 'untrusted'
+
+            Remove-FallbackArtifact -Path $path -Attempts 1 -DelayMilliseconds 0 | Should -Be $true
+            Test-Path -LiteralPath $path | Should -Be $false
+        }
+
+        It 'succeeds when the artifact is already absent' {
+            Remove-FallbackArtifact -Path (Join-Path $TestDrive 'absent.png') -Attempts 1 -DelayMilliseconds 0 | Should -Be $true
+        }
+    }
+
     Context 'Find-SnipasteExecutable' {
+        BeforeEach {
+            $script:previousExecutableOverride = $env:CODEX_SNIPASTE_PATH
+            $script:previousConfigOverride = $env:CODEX_SNIPASTE_CONFIG
+            $script:previousPath = $env:PATH
+            Remove-Item Env:CODEX_SNIPASTE_PATH -ErrorAction SilentlyContinue
+            $env:CODEX_SNIPASTE_CONFIG = Join-Path $TestDrive 'missing-config.json'
+        }
+
+        AfterEach {
+            if ($null -eq $script:previousExecutableOverride) { Remove-Item Env:CODEX_SNIPASTE_PATH -ErrorAction SilentlyContinue } else { $env:CODEX_SNIPASTE_PATH = $script:previousExecutableOverride }
+            if ($null -eq $script:previousConfigOverride) { Remove-Item Env:CODEX_SNIPASTE_CONFIG -ErrorAction SilentlyContinue } else { $env:CODEX_SNIPASTE_CONFIG = $script:previousConfigOverride }
+            $env:PATH = $script:previousPath
+        }
+
         It 'returns an explicitly supplied existing executable' {
             $path = Join-Path $TestDrive 'Snipaste.exe'
             Set-Content -LiteralPath $path -Value ''
@@ -65,6 +93,36 @@ Describe 'Win10Snipaste common helpers' {
             } catch {
                 $_.Exception.Message | Should -Match '\[SNIPASTE_NOT_FOUND\]'
             }
+        }
+
+        It 'discovers a portable executable from the environment override' {
+            $path = Join-Path $TestDrive 'portable-after-stale-config\Snipaste.exe'
+            New-Item -ItemType Directory -Path (Split-Path -Parent $path) | Out-Null
+            Set-Content -LiteralPath $path -Value ''
+            $env:CODEX_SNIPASTE_PATH = $path
+
+            Find-SnipasteExecutable | Should -Be ([IO.Path]::GetFullPath($path))
+        }
+
+        It 'discovers a portable executable from saved configuration' {
+            $path = Join-Path $TestDrive 'portable-config\Snipaste.exe'
+            New-Item -ItemType Directory -Path (Split-Path -Parent $path) | Out-Null
+            Set-Content -LiteralPath $path -Value ''
+            Set-SnipasteConfiguration -SnipastePath $path -ConfigPath $env:CODEX_SNIPASTE_CONFIG | Out-Null
+
+            Find-SnipasteExecutable | Should -Be ([IO.Path]::GetFullPath($path))
+        }
+
+        It 'ignores a stale saved path and continues discovery' {
+            @{ schemaVersion = 1; snipastePath = (Join-Path $TestDrive 'gone\Snipaste.exe') } |
+                ConvertTo-Json | Set-Content -LiteralPath $env:CODEX_SNIPASTE_CONFIG
+            $directory = Join-Path $TestDrive 'portable-on-path'
+            $path = Join-Path $directory 'Snipaste.exe'
+            New-Item -ItemType Directory -Path $directory | Out-Null
+            Set-Content -LiteralPath $path -Value ''
+            $env:PATH = "$directory;$env:PATH"
+
+            Find-SnipasteExecutable | Should -Be ([IO.Path]::GetFullPath($path))
         }
     }
 }

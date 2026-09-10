@@ -56,12 +56,22 @@ $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 try {
     & $resolvedSnipaste snip --active-window -o $resolvedOutput
     $captureDeadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
+    $captureReady = $false
     do {
         Start-Sleep -Milliseconds 100
         $capture = Get-Item -LiteralPath $resolvedOutput -ErrorAction SilentlyContinue
-    } while ((-not $capture -or $capture.Length -le 0) -and [DateTime]::UtcNow -lt $captureDeadline)
-    if (-not $capture -or $capture.Length -le 0) {
-        Write-FallbackError -Code 'CAPTURE_TIMEOUT' -Message "Snipaste did not create a non-empty PNG within $TimeoutSeconds seconds."
+        if ($capture -and $capture.Length -gt 0) {
+            $stream = $null
+            try {
+                $stream = [System.IO.File]::Open($resolvedOutput, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::None)
+                $captureReady = $true
+            } catch { } finally {
+                if ($stream) { $stream.Dispose() }
+            }
+        }
+    } while (-not $captureReady -and [DateTime]::UtcNow -lt $captureDeadline)
+    if (-not $captureReady) {
+        Write-FallbackError -Code 'CAPTURE_TIMEOUT' -Message "Snipaste did not finish writing a non-empty PNG within $TimeoutSeconds seconds."
     }
     $dimensions = Get-PngDimensions -Path $resolvedOutput
     $after = Get-ForegroundWindowSnapshot -IncludeWindowTitle:$IncludeWindowTitle
@@ -108,8 +118,11 @@ try {
         sha256 = $metadata.image.sha256
     }
 } catch {
+    $originalError = $_
     $stopwatch.Stop()
-    if (Test-Path -LiteralPath $resolvedOutput) { Remove-Item -LiteralPath $resolvedOutput -Force }
-    if (Test-Path -LiteralPath $resolvedMetadata) { Remove-Item -LiteralPath $resolvedMetadata -Force }
-    throw
+    $cleanupFailures = @()
+    if (-not (Remove-FallbackArtifact -Path $resolvedOutput)) { $cleanupFailures += $resolvedOutput }
+    if (-not (Remove-FallbackArtifact -Path $resolvedMetadata)) { $cleanupFailures += $resolvedMetadata }
+    if ($cleanupFailures.Count -gt 0) { Write-Warning 'One or more rejected capture artifacts could not be removed after retrying.' }
+    throw $originalError
 }

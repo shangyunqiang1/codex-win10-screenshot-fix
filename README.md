@@ -47,6 +47,15 @@ Restart Codex so it discovers the skill.
 ./scripts/capture-active-window.ps1 -OutputPath ./captures/window.png
 ```
 
+For a portable Snipaste extracted to an arbitrary directory, save its path once and diagnose again:
+
+```powershell
+./scripts/configure.ps1 -SnipastePath 'F:\path\to\Snipaste.exe'
+./scripts/diagnose.ps1
+```
+
+The default configuration is `%LOCALAPPDATA%\Codex\win10-snipaste-fallback\config.json`. Discovery checks the command-line `-SnipastePath`, the `CODEX_SNIPASTE_PATH` environment variable, saved configuration, a running process, PATH, App Paths registry entries, and common install directories, in that order. A stale configuration is ignored while other sources are tried; drives are never searched recursively.
+
 The capture command creates `window.png` and `window.json`. Existing output files are never overwritten. Add `-IncludeWindowTitle` only when the title is required and safe to store.
 
 The Snipaste image contains physical pixels. Computer Use screenshot observations additionally carry screenshot IDs and logical coordinate context, so the two implementations are not interchangeable for coordinate clicks. Prefer accessibility or keyboard actions, or establish the DPI scale and verify after every coordinate action.
@@ -57,7 +66,7 @@ The Snipaste image contains physical pixels. Computer Use screenshot observation
 | --- | --- |
 | `FOCUS_UNSTABLE` / `FOCUS_CHANGED` | Reactivate the verified target and retry once with a new path. |
 | `TARGET_MISMATCH` | The foreground HWND/PID is not the expected target; stop. |
-| `SNIPASTE_NOT_FOUND` | Start Snipaste or supply its executable path. |
+| `SNIPASTE_NOT_FOUND` | Configure a portable install with `scripts/configure.ps1`, or supply a one-off executable path. |
 | `CAPTURE_TIMEOUT` / `INVALID_OUTPUT` | Capture did not produce a valid PNG; diagnose before retrying. |
 | `OUTPUT_EXISTS` / `METADATA_EXISTS` | Choose a new output path. |
 

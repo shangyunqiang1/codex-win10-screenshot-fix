@@ -8,6 +8,7 @@ Describe 'skill package' {
             'SKILL.md',
             'agents\openai.yaml',
             'scripts\Win10Snipaste.Common.ps1',
+            'scripts\configure.ps1',
             'scripts\capture-active-window.ps1',
             'scripts\diagnose.ps1',
             'README.md',
@@ -37,6 +38,7 @@ Describe 'skill package' {
             $content = Get-Content -LiteralPath (Join-Path $repoRoot $guide) -Raw
             $content | Should -Match 'scripts/capture-active-window\.ps1'
             $content | Should -Match 'scripts/diagnose\.ps1'
+            $content | Should -Match 'scripts/configure\.ps1'
             $content | Should -Match 'https://www\.snipaste\.com/'
         }
     }

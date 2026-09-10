@@ -5,13 +5,66 @@ function Write-FallbackError {
     throw "[$Code] $Message"
 }
 
-function Find-SnipasteExecutable {
+function Get-SnipasteConfigurationPath {
     param([string] $ExplicitPath)
+    if ($ExplicitPath) { return [System.IO.Path]::GetFullPath($ExplicitPath) }
+    if ($env:CODEX_SNIPASTE_CONFIG) { return [System.IO.Path]::GetFullPath($env:CODEX_SNIPASTE_CONFIG) }
+    if (-not $env:LOCALAPPDATA) {
+        Write-FallbackError -Code 'CONFIG_PATH_UNAVAILABLE' -Message 'LOCALAPPDATA is unavailable. Pass -ConfigPath explicitly.'
+    }
+    Join-Path $env:LOCALAPPDATA 'Codex\win10-snipaste-fallback\config.json'
+}
+
+function Get-ConfiguredSnipasteExecutable {
+    param([string] $ConfigPath)
+    $resolvedConfig = Get-SnipasteConfigurationPath -ExplicitPath $ConfigPath
+    if (-not (Test-Path -LiteralPath $resolvedConfig -PathType Leaf)) { return $null }
+    try {
+        $configuration = Get-Content -LiteralPath $resolvedConfig -Raw | ConvertFrom-Json
+        $property = $configuration.PSObject.Properties['snipastePath']
+        if (-not $property -or -not $property.Value) { return $null }
+        $candidate = [System.IO.Path]::GetFullPath([string] $property.Value)
+        if (Test-Path -LiteralPath $candidate -PathType Leaf) { return $candidate }
+    } catch { }
+    $null
+}
+
+function Set-SnipasteConfiguration {
+    param(
+        [Parameter(Mandatory = $true)][string] $SnipastePath,
+        [string] $ConfigPath
+    )
+    $resolvedSnipaste = [System.IO.Path]::GetFullPath($SnipastePath)
+    if (-not (Test-Path -LiteralPath $resolvedSnipaste -PathType Leaf)) {
+        Write-FallbackError -Code 'SNIPASTE_NOT_FOUND' -Message "Snipaste executable not found: $resolvedSnipaste"
+    }
+    $resolvedConfig = Get-SnipasteConfigurationPath -ExplicitPath $ConfigPath
+    $directory = [System.IO.Path]::GetDirectoryName($resolvedConfig)
+    [System.IO.Directory]::CreateDirectory($directory) | Out-Null
+    $temporaryPath = Join-Path $directory ('.config-{0}.tmp' -f [Guid]::NewGuid().ToString('N'))
+    try {
+        [ordered]@{ schemaVersion = 1; snipastePath = $resolvedSnipaste } |
+            ConvertTo-Json | Set-Content -LiteralPath $temporaryPath -Encoding UTF8
+        Move-Item -LiteralPath $temporaryPath -Destination $resolvedConfig -Force
+    } finally {
+        if (Test-Path -LiteralPath $temporaryPath) { Remove-Item -LiteralPath $temporaryPath -Force }
+    }
+    [pscustomobject]@{ configPath = $resolvedConfig; snipastePath = $resolvedSnipaste }
+}
+
+function Find-SnipasteExecutable {
+    param([string] $ExplicitPath, [string] $ConfigPath)
     if ($ExplicitPath) {
         $candidate = [System.IO.Path]::GetFullPath($ExplicitPath)
         if (Test-Path -LiteralPath $candidate -PathType Leaf) { return $candidate }
         Write-FallbackError -Code 'SNIPASTE_NOT_FOUND' -Message "Snipaste executable not found: $candidate"
     }
+    if ($env:CODEX_SNIPASTE_PATH) {
+        $candidate = [System.IO.Path]::GetFullPath($env:CODEX_SNIPASTE_PATH)
+        if (Test-Path -LiteralPath $candidate -PathType Leaf) { return $candidate }
+    }
+    $configured = try { Get-ConfiguredSnipasteExecutable -ConfigPath $ConfigPath } catch { $null }
+    if ($configured) { return $configured }
     $running = Get-Process -Name 'Snipaste' -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($running) {
         try { if ($running.Path -and (Test-Path -LiteralPath $running.Path -PathType Leaf)) { return $running.Path } } catch { }
@@ -39,7 +92,7 @@ function Find-SnipasteExecutable {
     foreach ($candidate in $commonPaths) {
         if (Test-Path -LiteralPath $candidate -PathType Leaf) { return $candidate }
     }
-    Write-FallbackError -Code 'SNIPASTE_NOT_FOUND' -Message 'Snipaste.exe was not found. Start Snipaste or pass -SnipastePath with its exact path.'
+    Write-FallbackError -Code 'SNIPASTE_NOT_FOUND' -Message 'Snipaste.exe was not found. Run configure.ps1 once for a portable install, or pass -SnipastePath with its exact path.'
 }
 
 function Initialize-ForegroundWindowApi {
@@ -106,4 +159,22 @@ function Get-PngDimensions {
 function Test-MatchingWindowSnapshot {
     param([Parameter(Mandatory = $true)] $Before, [Parameter(Mandatory = $true)] $After)
     ($Before.handle -eq $After.handle) -and ($Before.processId -eq $After.processId)
+}
+
+function Remove-FallbackArtifact {
+    param(
+        [Parameter(Mandatory = $true)][string] $Path,
+        [ValidateRange(1, 20)][int] $Attempts = 10,
+        [ValidateRange(0, 1000)][int] $DelayMilliseconds = 100
+    )
+    for ($attempt = 1; $attempt -le $Attempts; $attempt++) {
+        if (-not (Test-Path -LiteralPath $Path)) { return $true }
+        try {
+            Remove-Item -LiteralPath $Path -Force -ErrorAction Stop
+            return $true
+        } catch {
+            if ($attempt -lt $Attempts -and $DelayMilliseconds -gt 0) { Start-Sleep -Milliseconds $DelayMilliseconds }
+        }
+    }
+    -not (Test-Path -LiteralPath $Path)
 }

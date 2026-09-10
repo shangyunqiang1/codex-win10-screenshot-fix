@@ -40,6 +40,15 @@ git clone https://github.com/shangyunqiang1/codex-win10-screenshot-fix "$env:USE
 ./scripts/capture-active-window.ps1 -OutputPath ./captures/window.png
 ```
 
+如果 Snipaste 是解压到任意目录的便携版，请先保存一次路径，再重新诊断：
+
+```powershell
+./scripts/configure.ps1 -SnipastePath 'F:\path\to\Snipaste.exe'
+./scripts/diagnose.ps1
+```
+
+默认配置保存在 `%LOCALAPPDATA%\Codex\win10-snipaste-fallback\config.json`。自动发现依次检查：命令行 `-SnipastePath`、`CODEX_SNIPASTE_PATH` 环境变量、本地配置、运行中进程、PATH、App Paths 注册表和常见安装目录。配置失效时会继续检查其他来源，不会递归扫描磁盘。
+
 成功后会同时得到 `window.png` 和 `window.json`。脚本不会覆盖已有文件。只有确认窗口标题可以安全落盘时才使用 `-IncludeWindowTitle`。
 
 ## 错误码
@@ -48,7 +57,7 @@ git clone https://github.com/shangyunqiang1/codex-win10-screenshot-fix "$env:USE
 | --- | --- |
 | `FOCUS_UNSTABLE` / `FOCUS_CHANGED` | 重新激活已确认的目标，用新路径重试一次。 |
 | `TARGET_MISMATCH` | 前台 HWND/PID 不是预期目标，停止操作。 |
-| `SNIPASTE_NOT_FOUND` | 启动 Snipaste 或提供程序路径。 |
+| `SNIPASTE_NOT_FOUND` | 便携版先运行 `scripts/configure.ps1`，或临时提供程序路径。 |
 | `CAPTURE_TIMEOUT` / `INVALID_OUTPUT` | 未生成有效 PNG，先诊断再重试。 |
 | `OUTPUT_EXISTS` / `METADATA_EXISTS` | 换用新的输出路径。 |
 

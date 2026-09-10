@@ -2,7 +2,12 @@
 
 ## Unreleased
 
+## 0.3.2 - 2026-09-10
+
 - Rename the GitHub repository to `codex-win10-screenshot-fix` and add discovery-focused topics.
+- Discover portable Snipaste installations through a persistent per-user configuration or `CODEX_SNIPASTE_PATH` override.
+- Add `scripts/configure.ps1`, regression tests, and bilingual setup instructions without scanning unrelated drives.
+- Wait until Snipaste releases the PNG before validation, and preserve the original capture error while retrying cleanup.
 
 ## 0.3.1 - 2026-09-10
 
