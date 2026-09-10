@@ -14,7 +14,7 @@ The upstream issue is tracked at [openai/codex#25178](https://github.com/openai/
 
 - Windows 10
 - Codex desktop with the Computer Use skill
-- Snipaste running in the background, or installed where the helper can discover it
+- [Snipaste](https://www.snipaste.com/) running in the background, or installed where the helper can discover it
 - A Snipaste build that supports direct PNG file output from the command line
 
 ## Install
