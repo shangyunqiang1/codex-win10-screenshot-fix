@@ -1,0 +1,12 @@
+name: Validate
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  powershell:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate scripts and skill
+        shell: pwsh
+        run: ./tests/validate.ps1
