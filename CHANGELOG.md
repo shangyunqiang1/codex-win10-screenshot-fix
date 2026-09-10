@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 - 2026-09-10
+
+- Update GitHub Actions checkout to the Node.js 24-based v6 runtime.
+
 ## 0.2.0 - 2026-09-10
 
 - Verify that the foreground window is stable before capture and unchanged afterward.
