@@ -1,5 +1,7 @@
 # Win10 Snipaste fallback for Codex Computer Use
 
+[![Test](https://github.com/shangyunqiang1/win10-snipaste-fallback/actions/workflows/test.yml/badge.svg)](https://github.com/shangyunqiang1/win10-snipaste-fallback/actions/workflows/test.yml)
+
 A small, non-invasive Codex skill that keeps native Computer Use for window selection, accessibility, and input while replacing only the broken screenshot step with a local Snipaste capture. No DLL injection or application binary changes are used.
 
 [简体中文](README.zh-CN.md)
@@ -19,13 +21,14 @@ The upstream issue is tracked at [openai/codex#25178](https://github.com/openai/
 - [Snipaste](https://www.snipaste.com/) running in the background, or installed where the helper can discover it
 - A Snipaste build that supports direct PNG file output from the command line
 
-## What 0.2 adds
+## What 0.3 adds
 
 - Checks that the same foreground HWND/PID remains active before and after capture.
 - Deletes a rejected capture if focus changed, then allows one controlled retry.
 - Writes a JSON sidecar containing physical dimensions, DPI scale, duration, and SHA-256.
 - Keeps window titles and executable paths out of diagnostics by default.
-- Includes a read-only diagnostic command and Windows GitHub Actions validation.
+- Adds Pester 6.1 tests for window identity, PNG parsing, preflight error codes, diagnostics privacy, syntax, and package integrity.
+- Runs GitHub Actions on both PowerShell 7 and Windows PowerShell 5.1 and preserves NUnit and JaCoCo artifacts.
 
 ## Install
 
@@ -69,6 +72,17 @@ The Snipaste image contains physical pixels. Computer Use screenshot observation
 ## Safety boundary
 
 The skill refuses overwrites, stores captures locally, and excludes window titles by default. It never captures authentication dialogs, password managers, Windows security surfaces, or content known to contain secrets.
+
+## Development and tests
+
+Install the pinned test dependency and run the suite:
+
+```powershell
+Install-Module Pester -RequiredVersion 6.1.0 -Scope CurrentUser -Force -SkipPublisherCheck
+./tests/run.ps1
+```
+
+Test results and coverage are written under `test-results/`. The suite enforces a 40% coverage floor for the deterministic scripts; live Snipaste capture remains an end-to-end test because CI has no interactive desktop. GitHub Actions runs the same suite under PowerShell 7 and Windows PowerShell 5.1 on every push and pull request.
 
 ## License
 

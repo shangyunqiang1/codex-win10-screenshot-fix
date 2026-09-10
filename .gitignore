@@ -1,2 +1,4 @@
 /test-output/
+/.tools/
+/test-results/
 /.skill-validation-support/

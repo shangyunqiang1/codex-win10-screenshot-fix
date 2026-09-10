@@ -1,0 +1,40 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  pester:
+    name: ${{ matrix.name }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: pwsh
+            name: PowerShell 7
+            shell: pwsh
+          - id: windows-powershell
+            name: Windows PowerShell 5.1
+            shell: powershell
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Pester 6.1.0
+        shell: ${{ matrix.shell }}
+        run: |
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          Install-Module Pester -RequiredVersion 6.1.0 -Scope CurrentUser -Force -SkipPublisherCheck
+      - name: Run Pester
+        shell: ${{ matrix.shell }}
+        run: ./tests/run.ps1 -OutputDirectory './test-results/${{ matrix.id }}'
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: pester-${{ matrix.id }}
+          path: test-results/${{ matrix.id }}/
+          if-no-files-found: warn
