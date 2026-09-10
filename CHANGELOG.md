@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Rename the GitHub repository to `codex-win10-screenshot-fix` and add discovery-focused topics.
+
 ## 0.3.1 - 2026-09-10
 
 - Use two explicit GitHub Actions jobs after GitHub rejected the equivalent matrix workflow before job creation.

@@ -1,6 +1,6 @@
 # Windows 10 的 Codex Computer Use Snipaste 截图后备方案
 
-[![测试](https://github.com/shangyunqiang1/win10-snipaste-fallback/actions/workflows/test.yml/badge.svg)](https://github.com/shangyunqiang1/win10-snipaste-fallback/actions/workflows/test.yml)
+[![测试](https://github.com/shangyunqiang1/codex-win10-screenshot-fix/actions/workflows/test.yml/badge.svg)](https://github.com/shangyunqiang1/codex-win10-screenshot-fix/actions/workflows/test.yml)
 
 这是一个安全、非侵入式的 Codex Skill：窗口选择、无障碍树和输入仍由原生 Computer Use 负责；只有发生 `SetIsBorderRequired` / `0x80004002` 截图错误时，才改用本地 Snipaste 捕获当前活动窗口。项目不会注入 DLL，也不会修改 Codex 程序文件。
 
@@ -28,7 +28,7 @@
 将仓库克隆到个人 Codex Skills 目录：
 
 ```powershell
-git clone https://github.com/shangyunqiang1/win10-snipaste-fallback "$env:USERPROFILE\.codex\skills\win10-snipaste-fallback"
+git clone https://github.com/shangyunqiang1/codex-win10-screenshot-fix "$env:USERPROFILE\.codex\skills\win10-snipaste-fallback"
 ```
 
 重启 Codex，使其重新发现 Skill。

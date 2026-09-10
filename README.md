@@ -1,6 +1,6 @@
 # Win10 Snipaste fallback for Codex Computer Use
 
-[![Test](https://github.com/shangyunqiang1/win10-snipaste-fallback/actions/workflows/test.yml/badge.svg)](https://github.com/shangyunqiang1/win10-snipaste-fallback/actions/workflows/test.yml)
+[![Test](https://github.com/shangyunqiang1/codex-win10-screenshot-fix/actions/workflows/test.yml/badge.svg)](https://github.com/shangyunqiang1/codex-win10-screenshot-fix/actions/workflows/test.yml)
 
 A small, non-invasive Codex skill that keeps native Computer Use for window selection, accessibility, and input while replacing only the broken screenshot step with a local Snipaste capture. No DLL injection or application binary changes are used.
 
@@ -35,7 +35,7 @@ The upstream issue is tracked at [openai/codex#25178](https://github.com/openai/
 Clone this repository into your personal Codex skills directory, keeping `SKILL.md`, `agents/`, and `scripts/` together:
 
 ```powershell
-git clone https://github.com/shangyunqiang1/win10-snipaste-fallback "$env:USERPROFILE\.codex\skills\win10-snipaste-fallback"
+git clone https://github.com/shangyunqiang1/codex-win10-screenshot-fix "$env:USERPROFILE\.codex\skills\win10-snipaste-fallback"
 ```
 
 Restart Codex so it discovers the skill.
