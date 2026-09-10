@@ -54,7 +54,11 @@ if ($ExpectedWindowHandle -and -not $stable.handle.Equals($ExpectedWindowHandle,
 
 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 try {
-    & $resolvedSnipaste snip --active-window -o $resolvedOutput
+    # The target is already uniquely selected and verified above. Passing its
+    # exact rectangle avoids Snipaste's second, timing-sensitive active-window
+    # lookup, which can silently produce no file on Windows 10.
+    $snipasteArguments = Get-SnipasteAreaCaptureArguments -Rect $stable.rect -OutputPath $resolvedOutput
+    & $resolvedSnipaste @snipasteArguments
     $captureDeadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
     $captureReady = $false
     do {
@@ -82,7 +86,7 @@ try {
     $metadata = [ordered]@{
         schemaVersion = 1
         status = 'ok'
-        backend = 'snipaste-active-window'
+        backend = 'snipaste-window-rect'
         capturedAtUtc = [DateTime]::UtcNow.ToString('o')
         durationMs = $stopwatch.ElapsedMilliseconds
         image = [ordered]@{

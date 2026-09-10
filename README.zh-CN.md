@@ -35,6 +35,8 @@ git clone https://github.com/shangyunqiang1/codex-win10-screenshot-fix "$env:USE
 
 ## 诊断与截图
 
+在 Windows 10 上，选定并激活唯一目标窗口后直接调用此后备方案，不要先请求原生 Computer Use 截图。这样可避开已知的 `SetIsBorderRequired` / `0x80004002` 失败路径；其他受支持的 Windows 版本仍应优先使用原生截图，除非出现该错误。
+
 ```powershell
 ./scripts/diagnose.ps1
 ./scripts/capture-active-window.ps1 -OutputPath ./captures/window.png
@@ -47,7 +49,7 @@ git clone https://github.com/shangyunqiang1/codex-win10-screenshot-fix "$env:USE
 ./scripts/diagnose.ps1
 ```
 
-默认配置保存在 `%LOCALAPPDATA%\Codex\win10-snipaste-fallback\config.json`。自动发现依次检查：命令行 `-SnipastePath`、`CODEX_SNIPASTE_PATH` 环境变量、本地配置、运行中进程、PATH、App Paths 注册表和常见安装目录。配置失效时会继续检查其他来源，不会递归扫描磁盘。
+默认配置保存在 `%LOCALAPPDATA%\Codex\win10-snipaste-fallback\config.json`。自动发现依次检查：命令行 `-SnipastePath`、`CODEX_SNIPASTE_PATH` 环境变量、本地配置、运行中进程、PATH、App Paths 注册表和常见安装目录。配置失效时会继续检查其他来源，不会递归扫描磁盘。脚本在验证前台 HWND/PID 后，会把该窗口的 Win32 矩形传给 Snipaste 的 `snip --area`，不再让 Snipaste 重新以 `--active-window` 判定目标。
 
 成功后会同时得到 `window.png` 和 `window.json`。脚本不会覆盖已有文件。只有确认窗口标题可以安全落盘时才使用 `-IncludeWindowTitle`。
 

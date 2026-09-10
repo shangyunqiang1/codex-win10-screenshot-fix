@@ -161,6 +161,26 @@ function Test-MatchingWindowSnapshot {
     ($Before.handle -eq $After.handle) -and ($Before.processId -eq $After.processId)
 }
 
+function Get-SnipasteAreaCaptureArguments {
+    param(
+        [Parameter(Mandatory = $true)] $Rect,
+        [Parameter(Mandatory = $true)][string] $OutputPath
+    )
+    if ($null -eq $Rect -or $Rect.width -le 0 -or $Rect.height -le 0) {
+        Write-FallbackError -Code 'INVALID_WINDOW_RECT' -Message 'The verified foreground window does not have a capturable rectangle.'
+    }
+    @(
+        'snip',
+        '--area',
+        [string] $Rect.left,
+        [string] $Rect.top,
+        [string] $Rect.width,
+        [string] $Rect.height,
+        '-o',
+        $OutputPath
+    )
+}
+
 function Remove-FallbackArtifact {
     param(
         [Parameter(Mandatory = $true)][string] $Path,

@@ -10,7 +10,7 @@ Keep Computer Use (`@oai/sky`) for window discovery, activation, accessibility s
 ## Workflow
 
 1. Follow the `computer-use` skill, select exactly one returned target window, and activate it.
-2. Use native `get_window_state` screenshot capture once unless the failure is already established in the current task. Fall back only for `SetIsBorderRequired`, `0x80004002`, or an explicit user request to use Snipaste.
+2. On Windows 10, use Snipaste directly and do not attempt native `get_window_state` screenshot capture first. On other Windows versions, fall back only for `SetIsBorderRequired`, `0x80004002`, or an explicit user request to use Snipaste.
 3. Keep using text-only Computer Use state when available: `get_window_state({ window, include_screenshot: false, include_text: true })`.
 4. Optionally run `scripts/diagnose.ps1` before the first capture. It reports readiness without exposing executable paths or window titles by default.
 5. If discovery fails for a portable install, run `scripts/configure.ps1 -SnipastePath '<exact path to Snipaste.exe>'` once, then rerun diagnosis without `-SnipastePath`.

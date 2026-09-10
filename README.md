@@ -42,6 +42,8 @@ Restart Codex so it discovers the skill.
 
 ## Diagnose and capture
 
+On Windows 10, invoke this fallback directly after selecting and activating one target window; do not first request a native Computer Use screenshot. This avoids the known `SetIsBorderRequired` / `0x80004002` failure path. On other supported Windows versions, use native capture unless it fails with that error.
+
 ```powershell
 ./scripts/diagnose.ps1
 ./scripts/capture-active-window.ps1 -OutputPath ./captures/window.png
@@ -56,7 +58,7 @@ For a portable Snipaste extracted to an arbitrary directory, save its path once 
 
 The default configuration is `%LOCALAPPDATA%\Codex\win10-snipaste-fallback\config.json`. Discovery checks the command-line `-SnipastePath`, the `CODEX_SNIPASTE_PATH` environment variable, saved configuration, a running process, PATH, App Paths registry entries, and common install directories, in that order. A stale configuration is ignored while other sources are tried; drives are never searched recursively.
 
-The capture command creates `window.png` and `window.json`. Existing output files are never overwritten. Add `-IncludeWindowTitle` only when the title is required and safe to store.
+The capture command creates `window.png` and `window.json`. Existing output files are never overwritten. After it has verified the foreground HWND/PID, it passes that window's Win32 rectangle to Snipaste with `snip --area` rather than relying on Snipaste to resolve `--active-window` a second time. Add `-IncludeWindowTitle` only when the title is required and safe to store.
 
 The Snipaste image contains physical pixels. Computer Use screenshot observations additionally carry screenshot IDs and logical coordinate context, so the two implementations are not interchangeable for coordinate clicks. Prefer accessibility or keyboard actions, or establish the DPI scale and verify after every coordinate action.
 

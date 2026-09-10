@@ -125,4 +125,20 @@ Describe 'Win10Snipaste common helpers' {
             Find-SnipasteExecutable | Should -Be ([IO.Path]::GetFullPath($path))
         }
     }
+
+    Context 'Get-SnipasteAreaCaptureArguments' {
+        It 'uses the already verified physical window rectangle instead of a second active-window lookup' {
+            $arguments = Get-SnipasteAreaCaptureArguments -Rect ([pscustomobject]@{
+                    left = -12; top = 24; width = 1280; height = 720
+                }) -OutputPath 'C:\captures\window.png'
+
+            $arguments | Should -Be @('snip', '--area', '-12', '24', '1280', '720', '-o', 'C:\captures\window.png')
+        }
+
+        It 'rejects a missing or empty window rectangle' {
+            {
+                Get-SnipasteAreaCaptureArguments -Rect ([pscustomobject]@{ left = 0; top = 0; width = 0; height = 10 }) -OutputPath 'C:\captures\window.png'
+            } | Should -Throw '*[INVALID_WINDOW_RECT]*'
+        }
+    }
 }
