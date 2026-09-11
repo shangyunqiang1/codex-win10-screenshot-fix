@@ -60,6 +60,8 @@ The default configuration is `%LOCALAPPDATA%\Codex\win10-snipaste-fallback\confi
 
 The capture command creates `window.png` and `window.json`. Existing output files are never overwritten. After it has verified the foreground HWND/PID, it passes that window's Win32 rectangle to Snipaste with `snip --area` rather than relying on Snipaste to resolve `--active-window` a second time. Add `-IncludeWindowTitle` only when the title is required and safe to store.
 
+In a restricted or sandboxed shell, `capture-active-window.ps1` can return `NO_FOREGROUND_WINDOW` because that shell cannot access the interactive desktop. Reactivate the uniquely confirmed target window, then retry exactly once from an execution context that can access the interactive desktop with a new output path. Retain the trusted expected HWND/PID validation for the retry; do not bypass it.
+
 The Snipaste image contains physical pixels. Computer Use screenshot observations additionally carry screenshot IDs and logical coordinate context, so the two implementations are not interchangeable for coordinate clicks. Prefer accessibility or keyboard actions, or establish the DPI scale and verify after every coordinate action.
 
 ## Error codes
@@ -67,6 +69,7 @@ The Snipaste image contains physical pixels. Computer Use screenshot observation
 | Code | Meaning |
 | --- | --- |
 | `FOCUS_UNSTABLE` / `FOCUS_CHANGED` | Reactivate the verified target and retry once with a new path. |
+| `NO_FOREGROUND_WINDOW` | The current shell cannot access the interactive desktop. Reactivate the uniquely confirmed target, then retry once from an interactive-desktop context with a new path while retaining HWND/PID validation. |
 | `TARGET_MISMATCH` | The foreground HWND/PID is not the expected target; stop. |
 | `SNIPASTE_NOT_FOUND` | Configure a portable install with `scripts/configure.ps1`, or supply a one-off executable path. |
 | `CAPTURE_TIMEOUT` / `INVALID_OUTPUT` | Capture did not produce a valid PNG; diagnose before retrying. |

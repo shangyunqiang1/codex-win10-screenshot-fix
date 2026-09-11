@@ -20,7 +20,7 @@ Keep Computer Use (`@oai/sky`) for window discovery, activation, accessibility s
 
 ## Recovery
 
-Errors have stable codes. For `FOCUS_UNSTABLE` or `FOCUS_CHANGED`, reactivate the uniquely selected Computer Use window and retry exactly once with a new output path. Stop if the retry fails. Do not retry `TARGET_MISMATCH`, `INVALID_OUTPUT`, or an unexpected error without diagnosing the cause.
+Errors have stable codes. For `FOCUS_UNSTABLE` or `FOCUS_CHANGED`, reactivate the uniquely selected Computer Use window and retry exactly once with a new output path. In a restricted or sandboxed shell, `NO_FOREGROUND_WINDOW` can mean the shell cannot access the interactive desktop: reactivate that uniquely confirmed target, then retry exactly once with a new output path from an execution context that can access the interactive desktop. Keep the trusted expected HWND/PID validation on that retry; never bypass it. Stop if the retry fails. Do not retry `TARGET_MISMATCH`, `INVALID_OUTPUT`, or an unexpected error without diagnosing the cause.
 
 ```powershell
 ./scripts/capture-active-window.ps1 -OutputPath ./captures/window.png

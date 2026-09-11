@@ -53,11 +53,14 @@ git clone https://github.com/shangyunqiang1/codex-win10-screenshot-fix "$env:USE
 
 成功后会同时得到 `window.png` 和 `window.json`。脚本不会覆盖已有文件。只有确认窗口标题可以安全落盘时才使用 `-IncludeWindowTitle`。
 
+在受限或沙箱化 shell 中，`capture-active-window.ps1` 可能因无法访问交互式桌面而返回 `NO_FOREGROUND_WINDOW`。请重新激活已唯一确认的目标窗口，然后在可访问交互式桌面的执行上下文中用新的输出路径仅重试一次。重试时必须保留受信任的预期 HWND/PID 验证，不得绕过该校验。
+
 ## 错误码
 
 | 错误码 | 含义 |
 | --- | --- |
 | `FOCUS_UNSTABLE` / `FOCUS_CHANGED` | 重新激活已确认的目标，用新路径重试一次。 |
+| `NO_FOREGROUND_WINDOW` | 当前 shell 无法访问交互式桌面。重新激活已唯一确认的目标后，在可访问交互式桌面的上下文中用新路径重试一次，同时保留 HWND/PID 验证。 |
 | `TARGET_MISMATCH` | 前台 HWND/PID 不是预期目标，停止操作。 |
 | `SNIPASTE_NOT_FOUND` | 便携版先运行 `scripts/configure.ps1`，或临时提供程序路径。 |
 | `CAPTURE_TIMEOUT` / `INVALID_OUTPUT` | 未生成有效 PNG，先诊断再重试。 |
